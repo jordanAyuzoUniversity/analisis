@@ -2,9 +2,9 @@ import streamlit as st
 import os
 import joblib
 import gdown
-
+import streamlit as st
 MODEL_PATH = "sentiment_stacking_model.pkl"
-MODEL_ID = "13LDynQLrKQQwUgkkZcVdV6quRocrxAKO"
+MODEL_ID = st.secrets["model"]["gdrive_id"]
 MODEL_URL = f"https://drive.google.com/uc?id={MODEL_ID}"
 
 def download_model():
