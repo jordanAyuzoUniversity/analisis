@@ -1,45 +1,91 @@
 import streamlit as st
 
 def render_interface(model, predict_fn):
-    st.markdown("<h1 style='text-align: center;'>🔍 Analizador de Sentimientos</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>💬 Chat de Análisis de Sentimientos</h1>", unsafe_allow_html=True)
 
-    # Inicializar historial
-    if "history" not in st.session_state:
-        st.session_state.history = []
+    # Estilo CSS personalizado para burbujas derecha/izquierda
+    st.markdown("""
+        <style>
+            .chat-container { margin-bottom: 1rem; }
 
-    # Entrada de texto
-    user_input = st.text_area("Escribe un mensaje:")
+            .user-message {
+                background-color: #d0ebff;
+                color: black;
+                padding: 0.8rem 1rem;
+                border-radius: 10px;
+                max-width: 70%;
+                margin: 0.5rem 0 0.5rem auto;
+                text-align: left;
+                clear: both;
+                float: right;
+            }
 
-    # Botón para analizar
-    if st.button("Analizar"):
-        if not user_input.strip():
-            st.warning("Por favor escribe algo.")
-        else:
-            # Predicción usando la función pasada
-            prediction = predict_fn(model, user_input)
-            sentiment = "Positivo" if prediction == 1 else "Negativo"
+            .bot-message-positive {
+                background-color: #d4edda;
+                color: black;
+                padding: 0.8rem 1rem;
+                border-radius: 10px;
+                max-width: 70%;
+                margin: 0.5rem auto 0.5rem 0;
+                text-align: left;
+                clear: both;
+                float: left;
+            }
 
-            # Mostrar resultado
-            if prediction == 1:
-                st.success("Última predicción: ✅ Sentimiento POSITIVO")
-            else:
-                st.error("Última predicción: ❌ Sentimiento NEGATIVO")
+            .bot-message-negative {
+                background-color: #f8d7da;
+                color: black;
+                padding: 0.8rem 1rem;
+                border-radius: 10px;
+                max-width: 70%;
+                margin: 0.5rem auto 0.5rem 0;
+                text-align: left;
+                clear: both;
+                float: left;
+            }
 
-            # Guardar en historial
-            st.session_state.history.append({
-                "Comentario": user_input,
-                "Predicción": sentiment
-            })
+            .emoji {
+                font-weight: bold;
+                margin-right: 0.5rem;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
-    # Mostrar historial
-    if st.session_state.history:
-        col1, col2 = st.columns([0.8, 0.2])
-        with col1:
-            st.markdown("<h3 style='text-align: center;'>Historial de Análisis</h3>", unsafe_allow_html=True)
-        with col2:
-            st.write("")
-            if st.button("Limpiar Tabla"):
-                st.session_state.history = []
-                st.rerun()
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-        st.dataframe(st.session_state.history, use_container_width=True)
+    # Mostrar el historial
+    for entry in st.session_state.chat_history:
+        st.markdown(
+            f"<div class='chat-container'><div class='user-message'>"
+            f"<span class='emoji'>👤</span>{entry['user']}</div></div>", 
+            unsafe_allow_html=True
+        )
+
+        # Determinar clase según sentimiento
+        bot_class = "bot-message-positive" if "✅" in entry["bot"] else "bot-message-negative"
+
+        st.markdown(
+            f"<div class='chat-container'><div class='{bot_class}'>"
+            f"<span class='emoji'>🤖</span>{entry['bot']}</div></div>", 
+            unsafe_allow_html=True
+        )
+
+    user_input = st.chat_input("Escribe tu mensaje para analizar el sentimiento...")
+
+    if user_input:
+        prediction = predict_fn(model, user_input)
+        sentiment = "Positivo" if prediction == 1 else "Negativo"
+        icon = "✅" if prediction == 1 else "❌"
+        response = f"{icon} Sentimiento ** {sentiment.upper()} **"
+
+        st.session_state.chat_history.append({
+            "user": user_input,
+            "bot": response
+        })
+
+        st.rerun()
+
+    if st.button("🧹 Limpiar conversación"):
+        st.session_state.chat_history = []
+        st.rerun()
