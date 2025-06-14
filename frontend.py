@@ -59,13 +59,6 @@ def render_interface(model, predict_fn):
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Mostrar mensaje inicial si el historial está vacío
-    if not st.session_state.chat_history:
-        st.session_state.chat_history.append({
-            "user": None,
-            "bot": "👋 ¡Hola! Soy un modelo de análisis de sentimientos basado en *stacking*. Escribe una opinión y te diré si es positiva o negativa."
-        })
-
     # Mostrar el historial
     for entry in st.session_state.chat_history:
         if entry["user"] is not None:
@@ -88,16 +81,31 @@ def render_interface(model, predict_fn):
     user_input = st.chat_input("Escribe tu mensaje para analizar el sentimiento...")
 
     if user_input:
-        prediction = predict_fn(model, user_input)
-        sentiment = "Positivo" if prediction == 1 else "Negativo"
-        icon = "✅" if prediction == 1 else "❌"
-        response = f"{icon} Sentimiento <strong>{sentiment.upper()}</strong>"
+        # Si el usuario escribe /info
+        if user_input.strip().lower() == "/info":
+            info_msg = (
+                "📘 <strong>Información del modelo:</strong><br>"
+                "Este es un modelo de análisis de sentimientos desarrollado con la técnica "
+                "<em>stacking</em>. Fue creado como parte de un proyecto académico para la "
+                "materia <strong>Reconocimiento de Patrones</strong> en la <strong>Universidad Tecnológica de la Mixteca</strong>.<br><br>"
+                "🔤 El modelo está entrenado para funcionar con opiniones escritas en <strong>inglés</strong>."
+            )
+            st.session_state.chat_history.append({
+                "user": user_input,
+                "bot": info_msg
+            })
+            st.rerun()
+        else:
+            prediction = predict_fn(model, user_input)
+            sentiment = "Positivo" if prediction == 1 else "Negativo"
+            icon = "✅" if prediction == 1 else "❌"
+            response = f"{icon} Sentimiento <strong>{sentiment.upper()}</strong>"
 
-        st.session_state.chat_history.append({
-            "user": user_input,
-            "bot": response
-        })
-        st.rerun()
+            st.session_state.chat_history.append({
+                "user": user_input,
+                "bot": response
+            })
+            st.rerun()
 
     if st.button("🧹 Limpiar conversación"):
         st.session_state.chat_history = []
