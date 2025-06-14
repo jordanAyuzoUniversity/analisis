@@ -6,7 +6,7 @@ def render_interface(model, predict_fn):
                 position: sticky;
                 top: 0;
                 background-color: inherit;
-                color: white; 
+                color: CanvasText;
                 z-index: 100;
                 padding: 0.5rem 0;
                 text-align: center;
