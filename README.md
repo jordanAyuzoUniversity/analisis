@@ -47,6 +47,7 @@ Si no tienes el archivo `requirements.txt`, puedes instalar manualmente:
 ```bash
 pip install streamlit joblib scikit-learn xgboost
 ```
+4. Crea un .ENV con las claves
 
 ## ▶️ Ejecutar la aplicación
 
