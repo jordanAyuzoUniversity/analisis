@@ -1,4 +1,5 @@
 import streamlit as st
+
 def render_interface(model, predict_fn):
     st.markdown("""
         <style>
@@ -6,11 +7,10 @@ def render_interface(model, predict_fn):
                 position: sticky;
                 top: 0;
                 background-color: inherit;
-                color: ;
                 z-index: 100;
                 padding: 0.5rem 0;
                 text-align: center;
-                font-size: 1.5rem; /* Más pequeño que h1 */
+                font-size: 1.5rem;
                 font-weight: 600;
                 border-bottom: 1px solid #ccc;
             }
@@ -18,7 +18,6 @@ def render_interface(model, predict_fn):
         <div class="sticky-title">Chat de Análisis de Sentimientos</div>
     """, unsafe_allow_html=True)
 
-    # Estilo CSS personalizado para burbujas derecha/izquierda
     st.markdown("""
         <style>
             .chat-container { margin-bottom: 1rem; }
@@ -35,8 +34,8 @@ def render_interface(model, predict_fn):
                 float: right;
             }
 
-            .bot-message-positive {
-                background-color: #d4edda;
+            .bot-message-positive, .bot-message-negative, .bot-message-welcome {
+                background-color: #e2e3e5;
                 color: black;
                 padding: 0.8rem 1rem;
                 border-radius: 10px;
@@ -47,17 +46,8 @@ def render_interface(model, predict_fn):
                 float: left;
             }
 
-            .bot-message-negative {
-                background-color: #f8d7da;
-                color: black;
-                padding: 0.8rem 1rem;
-                border-radius: 10px;
-                max-width: 70%;
-                margin: 0.5rem auto 0.5rem 0;
-                text-align: left;
-                clear: both;
-                float: left;
-            }
+            .bot-message-positive { background-color: #d4edda; }
+            .bot-message-negative { background-color: #f8d7da; }
 
             .emoji {
                 font-weight: bold;
@@ -69,20 +59,29 @@ def render_interface(model, predict_fn):
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
+    # Mostrar mensaje inicial si el historial está vacío
+    if not st.session_state.chat_history:
+        st.session_state.chat_history.append({
+            "user": None,
+            "bot": "👋 ¡Hola! Soy un modelo de análisis de sentimientos basado en *stacking*. Escribe una opinión y te diré si es positiva o negativa."
+        })
+
     # Mostrar el historial
     for entry in st.session_state.chat_history:
-        st.markdown(
-            f"<div class='chat-container'><div class='user-message'>"
-            f"{entry['user']}</div></div>", 
-            unsafe_allow_html=True
-        )
+        if entry["user"] is not None:
+            st.markdown(
+                f"<div class='chat-container'><div class='user-message'>{entry['user']}</div></div>",
+                unsafe_allow_html=True
+            )
 
-        # Determinar clase según sentimiento
-        bot_class = "bot-message-positive" if "✅" in entry["bot"] else "bot-message-negative"
+        bot_class = "bot-message-welcome"
+        if "✅" in entry["bot"]:
+            bot_class = "bot-message-positive"
+        elif "❌" in entry["bot"]:
+            bot_class = "bot-message-negative"
 
         st.markdown(
-            f"<div class='chat-container'><div class='{bot_class}'>"
-            f"<span class='emoji'></span>{entry['bot']}</div></div>", 
+            f"<div class='chat-container'><div class='{bot_class}'>{entry['bot']}</div></div>",
             unsafe_allow_html=True
         )
 
@@ -98,7 +97,6 @@ def render_interface(model, predict_fn):
             "user": user_input,
             "bot": response
         })
-
         st.rerun()
 
     if st.button("🧹 Limpiar conversación"):
