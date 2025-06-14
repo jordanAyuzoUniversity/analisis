@@ -3,7 +3,7 @@ from frontend import render_interface
 from backend import load_model, predict_sentiment
 
 # Configuración general de la página
-st.set_page_config(page_title="Sentiment Predictor", layout="centered")
+st.set_page_config(page_title="Predictor de Sentimientos", page_icon="💬")
 
 # Cargar el modelo una sola vez
 model = load_model()
