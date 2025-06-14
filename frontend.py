@@ -1,7 +1,4 @@
 import streamlit as st
-USER_ICON = "https://static.thenounproject.com/png/961-200.png"
-BOT_ICON = "https://static.thenounproject.com/png/4460467-200.png"
-
 def render_interface(model, predict_fn):
     st.markdown("""
         <style>
@@ -85,7 +82,7 @@ def render_interface(model, predict_fn):
 
         st.markdown(
             f"<div class='chat-container'><div class='{bot_class}'>"
-            f"{entry['bot']}</div></div>", 
+            f"<span class='emoji'></span>{entry['bot']}</div></div>", 
             unsafe_allow_html=True
         )
 
